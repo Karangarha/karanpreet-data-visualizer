@@ -1,163 +1,231 @@
-@font-face {
-  font-family: "ColfaxAI";
-  src:
-    url(https://cdn.openai.com/API/fonts/ColfaxAIRegular.woff2) format("woff2"),
-    url(https://cdn.openai.com/API/fonts/ColfaxAIRegular.woff) format("woff");
-  font-weight: normal;
-  font-style: normal;
+/* Tokens: light by default, dark when the OS asks for it */
+.page {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface-1: #fcfcfb;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --grid: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --hover: rgba(11, 11, 11, 0.05);
+  --series-1: #2a78d6;
+  --accent-ink: #ffffff;
+  --error-bg: #fdecec;
+  --error-text: #a12828;
+
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 22px;
 }
 
-@font-face {
-  font-family: "ColfaxAI";
-  src:
-    url(https://cdn.openai.com/API/fonts/ColfaxAIBold.woff2) format("woff2"),
-    url(https://cdn.openai.com/API/fonts/ColfaxAIBold.woff) format("woff");
-  font-weight: bold;
-  font-style: normal;
+@media (prefers-color-scheme: dark) {
+  .page {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --hover: rgba(255, 255, 255, 0.06);
+    --series-1: #3987e5;
+    --accent-ink: #ffffff;
+    --error-bg: #3a1717;
+    --error-text: #ffb4b4;
+  }
 }
 
-.body,
-.input {
-  font-size: 16px;
-  line-height: 24px;
-  color: #353740;
-  font-family: "ColfaxAI", Helvetica, sans-serif;
-}
-
-.body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 60px;
-}
-
-.icon {
-  width: 34px;
-}
-
-.h3 {
-  font-size: 32px;
-  line-height: 40px;
-  font-weight: bold;
-  color: #202123;
-  margin: 16px 0 40px;
-}
-
-.chatContainer {
-  max-width: 600px;
-  width: 100%;
-  margin: 0 auto;
-  padding-top: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 160px;
-  margin-bottom: 20px;
-  overflow: auto;
-}
-
-.userMessage,
-.assistantMessage {
-  padding: 12px 16px;
-  border: 1px solid #10a37f;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  max-width: 80%;
-  word-wrap: break-word;
-}
-
-.userMessage {
-  align-self: flex-end;
-  background-color: #daf8e3;
-}
-
-.assistantMessage {
-  align-self: flex-start;
-  background-color: #f1f1f1;
-}
-
-.messageInputContainer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  background: #fff;
-  border-top: 1px solid #eaeaea;
-  display: flex;
-  justify-content: center;
-  height: auto;
-  padding-bottom: 20px;
+.header {
+  text-align: center;
+  padding: 32px 16px 8px;
 }
 
 .heading1 {
-  text-align: center; /* Centers text horizontally */
-  width: 100%; /* Ensures the heading takes full width of its container */
-  margin: 0 auto; /* Applies automatic horizontal margins */
+  margin: 0 0 4px;
+  font-size: 36px;
+  line-height: 44px;
 }
 
-.form {
-  max-width: 600px;
-  width: 100%;
+.byline {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.main {
+  max-width: 960px;
   margin: 0 auto;
+  padding: 16px 16px 48px;
+  display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.row {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 8px;
 }
 
-.textarea {
-  padding: 12px 16px;
-  border: 1px solid #10a37f;
-  border-radius: 4px;
-  margin-bottom: 24px;
-  width: 100%;
-  min-height: 50px;
-  resize: both;
-  overflow: auto;
-  margin-right: 4px;
-  flex: 3;
+.meta {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 8px 0 0;
 }
 
-.buttonGroup {
-  display: flex;
+.row .meta {
+  margin: 0 0 0 8px;
 }
 
-.inputSubmit,
-.inputButton {
-  padding: 12px 16px;
-  color: #fff;
-  background-color: #10a37f;
-  border: none;
-  border-radius: 4px;
-  text-align: center;
+.primaryButton,
+.fileButton,
+.ghostButton {
+  padding: 9px 16px;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
   cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.primaryButton,
+.fileButton {
+  background: var(--series-1);
+  color: var(--accent-ink);
+}
+
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.ghostButton {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.ghostButton:hover {
+  background: var(--hover);
+}
+
+.textInput {
   flex: 1;
-  margin: 0 2px;
+  min-width: 220px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--page);
+  color: var(--text-primary);
+  font: inherit;
 }
 
-.inputSubmit {
-  flex-grow: 4;
-}
-
-.inputButton {
-  flex-grow: 1;
-  background-color: #f44336;
-}
-
-.inputText {
-  padding: 12px 16px;
-  border: 1px solid #10a37f;
+.reason {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--series-1);
+  background: var(--hover);
   border-radius: 4px;
-  margin-bottom: 24px;
+  color: var(--text-secondary);
 }
 
-.placeholder {
-  color: #8e8ea0;
-  opacity: 1;
+.error {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--error-bg);
+  color: var(--error-text);
 }
 
-.result {
-  font-weight: bold;
-  margin-top: 40px;
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.controls select {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--page);
+  color: var(--text-primary);
+  font: inherit;
+  min-width: 140px;
+}
+
+.chartTitle {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.chart {
+  width: 100%;
+}
+
+.tableWrap {
+  max-height: 360px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--grid);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-1);
+}
+
+.table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.type {
+  display: block;
+  font-weight: normal;
+  color: var(--text-muted);
+  font-size: 11px;
 }

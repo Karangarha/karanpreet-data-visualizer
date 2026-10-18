@@ -2,71 +2,51 @@ import OpenAI from "openai";
 
 const openai = new OpenAI();
 
-let chatHistory = [{ role: "system", content: "You are a helpful assistant." }];
+// Swap the model here to compare results (e.g. "gpt-5.2", "gpt-5-mini", "gpt-4o-mini")
+const MODEL = "gpt-5.2";
+
+// The prompt: ChatGPT reads the dataset's columns and picks the chart that answers the question
+const SYSTEM_PROMPT = `You are a data visualization assistant.
+You get a dataset's columns (with types), a few sample rows, and a user's question.
+Choose ONE chart that best answers the question. Reply with JSON only:
+{
+  "chart": "bar" | "line" | "scatter",
+  "x": "<column name>",
+  "y": "<numeric column name, or null when agg is count>",
+  "agg": "sum" | "avg" | "count",
+  "title": "<short chart title>",
+  "reason": "<one sentence: why this chart answers the question>"
+}
+Rules: use "line" when x is a date/time column, "bar" to compare categories,
+"scatter" to relate two numeric columns (agg is ignored for scatter).
+Only use column names that exist exactly as given.`;
 
 export default async function handler(req, res) {
-  const { method } = req;
+  if (req.method !== "POST") {
+    res.setHeader("Allow", ["POST"]);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
 
-  switch (method) {
-    case "POST":
-      if (req.query.endpoint === "chat") {
-        // Handle POST to /api/generate?endpoint=chat
-        const content = req.body.message;
-        chatHistory.push({ role: "user", content: content });
-        res.status(200).json({ success: true });
-      } else if (req.query.endpoint === "reset") {
-        // Handle POST to /api/generate?endpoint=reset
-        chatHistory = [
-          { role: "system", content: "You are a helpful assistant." },
-        ];
-        res.status(200).json({ success: true });
-      } else {
-        res.status(404).json({ error: "Not Found" });
-      }
-      break;
-    case "GET":
-      if (req.query.endpoint === "history") {
-        res.status(200).json(chatHistory);
-      } else if (req.query.endpoint === "stream") {
-        // Set headers for Server-Sent Events
-        res.setHeader("Content-Type", "text/event-stream");
-        res.setHeader("Cache-Control", "no-cache");
-        res.setHeader("Connection", "keep-alive");
+  const { question, columns, sample, rowCount } = req.body;
+  if (!question || !Array.isArray(columns) || columns.length === 0) {
+    return res.status(400).json({ error: "Upload data and ask a question first." });
+  }
 
-        try {
-          const stream = await openai.beta.chat.completions.stream({
-            model: "gpt-3.5-turbo",
-            messages: chatHistory,
-            stream: true,
-          });
-
-          for await (const chunk of stream) {
-            const message = chunk.choices[0]?.delta?.content || "";
-            res.write(`data: ${JSON.stringify(message)}\n\n`);
-          }
-
-          // After the stream ends, get the final chat completion
-          const chatCompletion = await stream.finalChatCompletion();
-        } catch (error) {
-          res.write(
-            "event: error\ndata: " +
-              JSON.stringify({ message: "Stream encountered an error" }) +
-              "\n\n"
-          );
-        }
-
-        // When the client closes the connection, we stop the stream
-        return new Promise((resolve) => {
-          req.on("close", () => {
-            resolve();
-          });
-        });
-      } else {
-        res.status(404).json({ error: "Not Found" });
-      }
-      break;
-    default:
-      res.setHeader("Allow", ["GET", "POST"]);
-      res.status(405).end(`Method ${method} Not Allowed`);
+  try {
+    const completion = await openai.chat.completions.create({
+      model: MODEL,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: JSON.stringify({ question, columns, rowCount, sample }),
+        },
+      ],
+    });
+    res.status(200).json(JSON.parse(completion.choices[0].message.content));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 }
